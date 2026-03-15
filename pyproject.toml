@@ -1,0 +1,20 @@
+[project]
+name = "conversation-hub"
+version = "0.1.0"
+description = "Pull, normalize, organize, and process AI conversations from multiple sources"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.scripts]
+conversation-hub = "conversation_hub.cli:main"
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
