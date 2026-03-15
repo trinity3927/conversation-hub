@@ -10,6 +10,11 @@ A Python project for pulling AI conversations from multiple sources, normalizing
 - Run downstream actions such as tagging, summarization, routing, extraction, or alerting
 - Make it easy to add new connectors and action pipelines
 
+## Current foundation
+
+- Normalized conversation data is moving toward vendor-neutral `Participant`, `ContentPart`, `Message`, and `Conversation` models.
+- Initial local-file connectors support ChatGPT export `conversations.json` files and a Claude JSON export format with embedded messages.
+
 ## Proposed architecture
 
 - `src/conversation_hub/connectors/`
