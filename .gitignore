@@ -21,7 +21,8 @@ dist/
 .exports/
 .index/
 .logs/
-# Put local conversation exports here so they never enter git
+.conversation-hub/
+# Put local conversation exports and generated local browser/import data here so they never enter git
 
 # Export archives and local storage outputs
 *.zip

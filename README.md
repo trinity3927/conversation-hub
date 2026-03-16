@@ -64,16 +64,20 @@ See [docs/analyze-cli.md](docs/analyze-cli.md) for the report shape and heuristi
 
 ## Browse CLI
 
-The CLI can browse normalized JSON conversations in a prompt-driven terminal session. This first version visibly prints the conversation list, an overall report, selected conversation details and messages, and one-off analysis for a single conversation.
+The CLI can browse normalized JSON conversations in a prompt-driven terminal session. It now supports both direct mode and a no-required-args workflow that can open an existing normalized JSON file or import from `chatgpt`, `claude`, or `codex` and then drop straight into the browser.
 
 ```bash
+conversation-hub browse
 conversation-hub browse --input ./normalized/conversations.json
 ```
+
+If you choose provider import in the no-args flow, the workflow prompts for the source path and normalized output path. Leaving the output path blank writes a human-readable JSON file under `./.conversation-hub/normalized/<provider>.json`.
 
 Main list commands:
 
 - type a conversation number to open it
 - type `r` to print an overall report
+- type `f` to filter the current conversation list by keyword
 - type `q` to quit
 
 Selected conversation commands:
@@ -83,7 +87,7 @@ Selected conversation commands:
 - type `b` to go back
 - type `q` to quit
 
-Internally, the command reloads normalized JSON with `conversation_hub.storage.load_conversations_json()` and hands the conversations to the reusable interactive session in `conversation_hub.interactive.run_browse_session()`.
+Internally, `conversation-hub browse --input ...` reloads normalized JSON with `conversation_hub.storage.load_conversations_json()` and hands the conversations to the reusable interactive session in `conversation_hub.interactive.run_browse_session()`. Running `conversation-hub browse` without `--input` dispatches into `conversation_hub.interactive.run_browse_workflow()`, which handles interactive loading/import before opening the same browser session.
 
 See [docs/browse-cli.md](docs/browse-cli.md) for the interaction flow and a full example.
 

@@ -26,26 +26,41 @@ def run_browse_session(
         output_fn("Quit browser.")
         return
 
+    visible_conversations = conversations
+    active_filter: str | None = None
+
     while True:
-        _render_conversation_list(conversations, output_fn)
-        command = _read_command("List command [number, r, q]:", input_fn, output_fn)
+        _render_conversation_list(
+            visible_conversations,
+            output_fn,
+            active_filter=active_filter,
+        )
+        command = _read_command("List command [number, r, f, q]:", input_fn, output_fn)
 
         if command == "q":
             output_fn("Quit browser.")
             return
 
         if command == "r":
-            _render_analysis_report("Overall report", run_analysis(conversations), output_fn)
+            _render_analysis_report("Overall report", run_analysis(visible_conversations), output_fn)
             continue
 
-        conversation_index = _parse_conversation_selection(command, len(conversations))
+        if command == "f":
+            active_filter, visible_conversations = _apply_conversation_filter(
+                conversations,
+                input_fn=input_fn,
+                output_fn=output_fn,
+            )
+            continue
+
+        conversation_index = _parse_conversation_selection(command, len(visible_conversations))
         if conversation_index is None:
             output_fn(f"Unrecognized command: {command or '(empty)'}")
             continue
 
         if _run_conversation_session(
             conversation_number=conversation_index + 1,
-            conversation=conversations[conversation_index],
+            conversation=visible_conversations[conversation_index],
             input_fn=input_fn,
             output_fn=output_fn,
         ):
@@ -84,9 +99,20 @@ def _run_conversation_session(
         output_fn(f"Unrecognized command: {command or '(empty)'}")
 
 
-def _render_conversation_list(conversations: list[Conversation], output_fn: OutputFn) -> None:
+def _render_conversation_list(
+    conversations: list[Conversation],
+    output_fn: OutputFn,
+    active_filter: str | None = None,
+) -> None:
     output_fn("Conversation browser")
     output_fn("====================")
+    if active_filter:
+        output_fn(f"Active filter: {active_filter}")
+
+    if not conversations:
+        output_fn("No conversations available in the current view.")
+        return
+
     for index, conversation in enumerate(conversations, start=1):
         title = conversation.title or "(untitled)"
         updated_at = _format_timestamp(conversation.updated_at) or "-"
@@ -205,6 +231,11 @@ def _read_command(prompt: str, input_fn: InputFn, output_fn: OutputFn) -> str:
     return input_fn().strip().lower()
 
 
+def _read_text(prompt: str, input_fn: InputFn, output_fn: OutputFn) -> str:
+    output_fn(prompt)
+    return input_fn().strip()
+
+
 def _parse_conversation_selection(command: str, conversation_count: int) -> int | None:
     if not command.isdigit():
         return None
@@ -236,6 +267,50 @@ def _format_participants(conversation: Conversation) -> str:
         label = participant.display_name or participant.role or participant.id or "unknown"
         participant_labels.append(label)
     return _format_csv(participant_labels)
+
+
+def _apply_conversation_filter(
+    conversations: list[Conversation],
+    input_fn: InputFn,
+    output_fn: OutputFn,
+) -> tuple[str | None, list[Conversation]]:
+    keyword = _read_text("Enter filter keyword [blank clears]:", input_fn, output_fn)
+    normalized_keyword = keyword.strip()
+    if not normalized_keyword:
+        output_fn("Cleared conversation filter.")
+        return None, conversations
+
+    filtered_conversations = [
+        conversation
+        for conversation in conversations
+        if _conversation_matches_keyword(conversation, normalized_keyword)
+    ]
+    output_fn(
+        f"Showing {len(filtered_conversations)} "
+        f"{_pluralize(len(filtered_conversations), 'conversation')} "
+        f"matching '{normalized_keyword}'."
+    )
+    return normalized_keyword, filtered_conversations
+
+
+def _conversation_matches_keyword(conversation: Conversation, keyword: str) -> bool:
+    normalized_keyword = keyword.lower()
+    searchable_values = [
+        conversation.id,
+        conversation.source,
+        conversation.title or "",
+        " ".join(conversation.tags),
+        " ".join(
+            participant.display_name or participant.role or participant.id or ""
+            for participant in conversation.participants
+        ),
+        " ".join(message.text_content for message in conversation.messages),
+    ]
+    return any(normalized_keyword in value.lower() for value in searchable_values if value)
+
+
+def _pluralize(count: int, singular: str) -> str:
+    return singular if count == 1 else f"{singular}s"
 
 
 def _format_tags(tags: list[str]) -> str:

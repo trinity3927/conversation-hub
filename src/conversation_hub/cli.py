@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 from conversation_hub.connectors import available_sources
-from conversation_hub.interactive import run_browse_session
+from conversation_hub.interactive import run_browse_session, run_browse_workflow
 from conversation_hub.pipelines import run_analysis, run_import
 from conversation_hub.storage import (
     conversations_to_list,
@@ -108,9 +108,8 @@ def build_parser() -> argparse.ArgumentParser:
     )
     browse_parser.add_argument(
         "--input",
-        required=True,
         type=Path,
-        help="Path to a normalized JSON conversation file",
+        help="Path to a normalized JSON conversation file; omit to launch the interactive import/load workflow",
     )
 
     return parser
@@ -169,7 +168,11 @@ def _run_search(input_path: Path, query: str, limit: int) -> int:
     return 0
 
 
-def _run_browse(input_path: Path) -> int:
+def _run_browse(input_path: Path | None) -> int:
+    if input_path is None:
+        run_browse_workflow()
+        return 0
+
     conversations = load_conversations_json(input_path)
     run_browse_session(conversations)
     return 0

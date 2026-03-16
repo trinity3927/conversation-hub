@@ -50,9 +50,10 @@ It should be kept current as the project evolves.
 - Search CLI implemented
   - `conversation-hub search --input PATH --query QUERY [--limit N]`
 - Interactive browse CLI implemented
-  - `conversation-hub browse --input PATH`
-  - reusable injected-I/O browser session over normalized JSON
-  - overall report, selected conversation details/messages, and one-conversation analysis
+  - `conversation-hub browse` no-args workflow for existing JSON or provider import
+  - `conversation-hub browse --input PATH` direct mode
+  - reusable injected-I/O workflow/session modules over normalized JSON
+  - overall report, keyword filtering, selected conversation details/messages, and one-conversation analysis
 - Tests added for schema, connectors, import pipeline, analysis pipeline, CLI, serialization, and normalized JSON loading
 - Interactive browse tests added
   - direct session tests with injected input/output functions

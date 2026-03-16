@@ -633,6 +633,18 @@ def test_browse_command_runs_interactive_session(tmp_path, capsys, monkeypatch) 
     assert "Conversations: 1" in output
 
 
+def test_browse_command_without_input_runs_interactive_workflow(capsys, monkeypatch) -> None:
+    commands = iter(["q"])
+    monkeypatch.setattr("builtins.input", lambda: next(commands))
+
+    exit_code = main(["browse"])
+
+    assert exit_code == 0
+    output = capsys.readouterr().out
+    assert "Choose how to load conversations" in output
+    assert "Quit workflow." in output
+
+
 def _searchable_conversations() -> list[Conversation]:
     return [
         Conversation(

@@ -37,6 +37,29 @@ def test_run_browse_session_prints_list_report_details_messages_and_single_analy
     assert "Quit browser." in combined_output
 
 
+def test_run_browse_session_filters_conversations_by_keyword() -> None:
+    commands = iter(["f", "ops", "1", "q"])
+    transcript: list[str] = []
+
+    def fake_input() -> str:
+        return next(commands)
+
+    def fake_output(message: object = "") -> None:
+        transcript.append(str(message))
+
+    run_browse_session(_browseable_conversations(), input_fn=fake_input, output_fn=fake_output)
+
+    combined_output = "\n".join(transcript)
+
+    assert "List command [number, r, f, q]:" in combined_output
+    assert "Enter filter keyword [blank clears]:" in combined_output
+    assert "Showing 1 conversation matching 'ops'." in combined_output
+    assert "Active filter: ops" in combined_output
+    assert "Conversation 1" in combined_output
+    assert "ID: conv-2" in combined_output
+    assert "Quit browser." in combined_output
+
+
 def _browseable_conversations() -> list[Conversation]:
     return [
         Conversation(
