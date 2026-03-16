@@ -1,6 +1,33 @@
 # conversation-hub
 
-A Python project for pulling AI conversations from multiple sources, normalizing them into a common schema, exporting them into local storage, organizing them for search/review, and running configurable actions on top of them.
+`conversation-hub` is a local-first CLI for turning scattered AI chat history into portable, searchable memory.
+
+It imports conversations from multiple sources, normalizes them into one schema, lets you browse and analyze them locally, and exports them into SQLite for search and downstream tooling.
+
+## What It Does
+
+- imports ChatGPT, Claude, and Codex conversation data
+- normalizes everything into one durable JSON format
+- browses conversations in a terminal UI with filtering, search, and per-thread analysis
+- generates deterministic local analysis reports for recurring projects, constraints, prompts, and unresolved threads
+- exports to SQLite and supports local text search
+- stays local-first with no hosted service requirement
+
+## Quick Demo
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+conversation-hub browse
+```
+
+From there you can:
+
+- import a Claude, ChatGPT, or Codex export
+- reopen recent datasets from the home screen
+- browse conversations interactively
+- export to SQLite and search locally
 
 ## Setup
 
