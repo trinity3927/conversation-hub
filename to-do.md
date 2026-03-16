@@ -49,7 +49,14 @@ It should be kept current as the project evolves.
   - `search_conversations_sqlite()` over exported conversation databases
 - Search CLI implemented
   - `conversation-hub search --input PATH --query QUERY [--limit N]`
+- Interactive browse CLI implemented
+  - `conversation-hub browse --input PATH`
+  - reusable injected-I/O browser session over normalized JSON
+  - overall report, selected conversation details/messages, and one-conversation analysis
 - Tests added for schema, connectors, import pipeline, analysis pipeline, CLI, serialization, and normalized JSON loading
+- Interactive browse tests added
+  - direct session tests with injected input/output functions
+  - CLI browse test with monkeypatched `input`
 - Development logging started in `logs/`
 - Added high-level project tracker in `to-do.md`
 
@@ -70,7 +77,7 @@ It should be kept current as the project evolves.
   - exported files/folders
   - local CLI state folders
   - provider-specific parsers
-- Expand local search/reporting beyond the first SQLite-backed text search
+- Expand local search/reporting beyond the first SQLite-backed text search and first interactive browser
 - Add additional export targets after SQLite proves out
 
 ## Later

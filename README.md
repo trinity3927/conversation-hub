@@ -62,6 +62,31 @@ Internally, the command loads normalized JSON back into `Conversation` objects w
 
 See [docs/analyze-cli.md](docs/analyze-cli.md) for the report shape and heuristic details.
 
+## Browse CLI
+
+The CLI can browse normalized JSON conversations in a prompt-driven terminal session. This first version visibly prints the conversation list, an overall report, selected conversation details and messages, and one-off analysis for a single conversation.
+
+```bash
+conversation-hub browse --input ./normalized/conversations.json
+```
+
+Main list commands:
+
+- type a conversation number to open it
+- type `r` to print an overall report
+- type `q` to quit
+
+Selected conversation commands:
+
+- type `m` to print messages
+- type `a` to analyze just that conversation
+- type `b` to go back
+- type `q` to quit
+
+Internally, the command reloads normalized JSON with `conversation_hub.storage.load_conversations_json()` and hands the conversations to the reusable interactive session in `conversation_hub.interactive.run_browse_session()`.
+
+See [docs/browse-cli.md](docs/browse-cli.md) for the interaction flow and a full example.
+
 ## Export CLI
 
 The CLI can export normalized JSON conversations into a deterministic local SQLite database.
@@ -102,7 +127,7 @@ See [docs/search-cli.md](docs/search-cli.md) for the command reference and JSON 
 
 ## Normalized output
 
-The import command writes a UTF-8 JSON array of normalized conversations. That same normalized JSON is the input format for `conversation-hub analyze` and `conversation-hub export --format sqlite`.
+The import command writes a UTF-8 JSON array of normalized conversations. That same normalized JSON is the input format for `conversation-hub analyze`, `conversation-hub browse`, and `conversation-hub export --format sqlite`.
 
 - Timestamps are serialized as ISO-8601 strings with explicit UTC offsets such as `2024-03-09T16:00:00+00:00`.
 - Conversations include stable top-level keys for `id`, `source`, `title`, `participants`, `messages`, `created_at`, `updated_at`, `tags`, and `metadata`.

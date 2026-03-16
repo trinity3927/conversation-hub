@@ -554,6 +554,85 @@ def test_search_command_prints_json_results_from_sqlite(tmp_path, capsys) -> Non
     )
 
 
+def test_browse_command_runs_interactive_session(tmp_path, capsys, monkeypatch) -> None:
+    input_path = tmp_path / "normalized.json"
+    input_path.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "conv-1",
+                    "source": "chatgpt",
+                    "title": "Taildrop release checklist",
+                    "participants": [
+                        {"id": "user", "role": "user", "display_name": None, "metadata": {}},
+                        {"id": "assistant", "role": "assistant", "display_name": None, "metadata": {}},
+                    ],
+                    "messages": [
+                        {
+                            "id": "msg-1",
+                            "participant": {
+                                "id": "user",
+                                "role": "user",
+                                "display_name": None,
+                                "metadata": {},
+                            },
+                            "parts": [
+                                {
+                                    "kind": "text",
+                                    "text": "Draft a Taildrop release checklist.",
+                                    "metadata": {},
+                                }
+                            ],
+                            "created_at": "2024-03-09T16:00:01+00:00",
+                            "metadata": {},
+                        },
+                        {
+                            "id": "msg-2",
+                            "participant": {
+                                "id": "assistant",
+                                "role": "assistant",
+                                "display_name": None,
+                                "metadata": {},
+                            },
+                            "parts": [
+                                {
+                                    "kind": "text",
+                                    "text": "Here is the checklist.",
+                                    "metadata": {},
+                                }
+                            ],
+                            "created_at": "2024-03-09T16:00:05+00:00",
+                            "metadata": {},
+                        },
+                    ],
+                    "created_at": "2024-03-09T16:00:00+00:00",
+                    "updated_at": "2024-03-09T16:00:05+00:00",
+                    "tags": [],
+                    "metadata": {},
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    commands = iter(["1", "a", "q"])
+    monkeypatch.setattr("builtins.input", lambda: next(commands))
+
+    exit_code = main(
+        [
+            "browse",
+            "--input",
+            str(input_path),
+        ]
+    )
+
+    assert exit_code == 0
+    output = capsys.readouterr().out
+    assert "Conversation browser" in output
+    assert "1. Taildrop release checklist" in output
+    assert "Analysis report for conversation conv-1" in output
+    assert "Conversations: 1" in output
+
+
 def _searchable_conversations() -> list[Conversation]:
     return [
         Conversation(

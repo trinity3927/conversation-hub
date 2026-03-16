@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 from conversation_hub.connectors import available_sources
+from conversation_hub.interactive import run_browse_session
 from conversation_hub.pipelines import run_analysis, run_import
 from conversation_hub.storage import (
     conversations_to_list,
@@ -101,6 +102,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Maximum number of matches to return",
     )
 
+    browse_parser = subparsers.add_parser(
+        "browse",
+        help="Browse normalized conversations in an interactive terminal session",
+    )
+    browse_parser.add_argument(
+        "--input",
+        required=True,
+        type=Path,
+        help="Path to a normalized JSON conversation file",
+    )
+
     return parser
 
 
@@ -157,6 +169,12 @@ def _run_search(input_path: Path, query: str, limit: int) -> int:
     return 0
 
 
+def _run_browse(input_path: Path) -> int:
+    conversations = load_conversations_json(input_path)
+    run_browse_session(conversations)
+    return 0
+
+
 def _pluralize(count: int, singular: str) -> str:
     return singular if count == 1 else f"{singular}s"
 
@@ -194,6 +212,9 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "search":
         return _run_search(args.input, args.query, args.limit)
+
+    if args.command == "browse":
+        return _run_browse(args.input)
 
     parser.error(f"Unknown command: {args.command}")
     return 2
