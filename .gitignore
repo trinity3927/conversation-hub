@@ -22,6 +22,9 @@ dist/
 .index/
 .logs/
 
+# Export archives
+*.zip
+
 # OS/editor
 .DS_Store
 .idea/
