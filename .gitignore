@@ -21,6 +21,7 @@ dist/
 .exports/
 .index/
 .logs/
+# Put local conversation exports here so they never enter git
 
 # Export archives
 *.zip
