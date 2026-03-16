@@ -15,6 +15,13 @@ from conversation_hub.storage.json_export import (
     message_to_dict,
     participant_to_dict,
 )
+from conversation_hub.storage.sqlite_search import (
+    SQLiteConversationSearchMatch,
+    SQLiteConversationSearchResult,
+    SQLiteSearchMatch,
+    SQLiteSearchResults,
+    search_conversations_sqlite,
+)
 from conversation_hub.storage.sqlite_store import SQLiteWriteResult, write_conversations_sqlite
 
 __all__ = [
@@ -29,6 +36,11 @@ __all__ = [
     "message_to_dict",
     "participant_from_dict",
     "participant_to_dict",
+    "SQLiteConversationSearchMatch",
+    "SQLiteConversationSearchResult",
+    "SQLiteSearchMatch",
+    "SQLiteSearchResults",
+    "search_conversations_sqlite",
     "SQLiteWriteResult",
     "write_conversations_sqlite",
 ]

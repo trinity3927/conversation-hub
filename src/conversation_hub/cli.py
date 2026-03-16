@@ -9,6 +9,7 @@ from conversation_hub.pipelines import run_analysis, run_import
 from conversation_hub.storage import (
     conversations_to_list,
     load_conversations_json,
+    search_conversations_sqlite,
     write_conversations_sqlite,
 )
 
@@ -77,6 +78,29 @@ def build_parser() -> argparse.ArgumentParser:
         help="Path to write the exported output",
     )
 
+    search_parser = subparsers.add_parser(
+        "search",
+        help="Search a local SQLite export and print deterministic JSON results",
+    )
+    search_parser.add_argument(
+        "--input",
+        required=True,
+        type=Path,
+        help="Path to a local SQLite conversation export",
+    )
+    search_parser.add_argument(
+        "--query",
+        required=True,
+        type=_non_empty_string,
+        help="Case-insensitive text to search in conversation titles and content",
+    )
+    search_parser.add_argument(
+        "--limit",
+        default=10,
+        type=_positive_int,
+        help="Maximum number of matches to return",
+    )
+
     return parser
 
 
@@ -127,8 +151,32 @@ def _run_export(format_name: str, input_path: Path, output_path: Path) -> int:
     return 0
 
 
+def _run_search(input_path: Path, query: str, limit: int) -> int:
+    result = search_conversations_sqlite(input_path, query=query, limit=limit)
+    print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+    return 0
+
+
 def _pluralize(count: int, singular: str) -> str:
     return singular if count == 1 else f"{singular}s"
+
+
+def _non_empty_string(value: str) -> str:
+    normalized_value = value.strip()
+    if not normalized_value:
+        raise argparse.ArgumentTypeError("value must not be empty")
+    return normalized_value
+
+
+def _positive_int(value: str) -> int:
+    try:
+        integer_value = int(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("value must be an integer") from exc
+
+    if integer_value < 1:
+        raise argparse.ArgumentTypeError("value must be at least 1")
+    return integer_value
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -143,6 +191,9 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "export":
         return _run_export(args.format, args.input, args.output)
+
+    if args.command == "search":
+        return _run_search(args.input, args.query, args.limit)
 
     parser.error(f"Unknown command: {args.command}")
     return 2

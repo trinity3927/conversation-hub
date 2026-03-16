@@ -80,6 +80,26 @@ Internally, the command reloads normalized JSON with `conversation_hub.storage.l
 
 See [docs/export-cli.md](docs/export-cli.md) for the command reference and SQLite table layout.
 
+## Search CLI
+
+The CLI can search a local SQLite export and print deterministic JSON results to stdout.
+
+```bash
+conversation-hub search --input ./storage/conversations.db --query Taildrop
+conversation-hub search --input ./storage/conversations.db --query Taildrop --limit 5
+```
+
+Typical local workflow:
+
+```bash
+conversation-hub export --format sqlite --input ./normalized/conversations.json --output ./storage/conversations.db
+conversation-hub search --input ./storage/conversations.db --query Taildrop --limit 3
+```
+
+The first search pass matches conversation titles and text content parts, then orders results deterministically so repeated runs are easy to diff and script against.
+
+See [docs/search-cli.md](docs/search-cli.md) for the command reference and JSON result shape.
+
 ## Normalized output
 
 The import command writes a UTF-8 JSON array of normalized conversations. That same normalized JSON is the input format for `conversation-hub analyze` and `conversation-hub export --format sqlite`.

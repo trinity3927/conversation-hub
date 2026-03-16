@@ -45,6 +45,10 @@ It should be kept current as the project evolves.
   - reusable `write_conversations_sqlite()` writer for deterministic `conversations`, `participants`, `messages`, and `content_parts` tables
 - Export CLI implemented
   - `conversation-hub export --format sqlite --input PATH --output PATH`
+- Reusable local SQLite search implemented
+  - `search_conversations_sqlite()` over exported conversation databases
+- Search CLI implemented
+  - `conversation-hub search --input PATH --query QUERY [--limit N]`
 - Tests added for schema, connectors, import pipeline, analysis pipeline, CLI, serialization, and normalized JSON loading
 - Development logging started in `logs/`
 - Added high-level project tracker in `to-do.md`
@@ -66,7 +70,7 @@ It should be kept current as the project evolves.
   - exported files/folders
   - local CLI state folders
   - provider-specific parsers
-- Add local search/report commands over normalized JSON and SQLite storage
+- Expand local search/reporting beyond the first SQLite-backed text search
 - Add additional export targets after SQLite proves out
 
 ## Later

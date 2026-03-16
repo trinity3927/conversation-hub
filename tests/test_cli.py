@@ -6,6 +6,8 @@ import sqlite3
 import pytest
 
 from conversation_hub.cli import main
+from conversation_hub.models.schema import ContentPart, Conversation, Message, Participant
+from conversation_hub.storage import write_conversations_sqlite
 
 
 def test_import_command_writes_normalized_chatgpt_json(tmp_path, capsys) -> None:
@@ -510,3 +512,86 @@ def test_export_command_writes_sqlite_database(tmp_path, capsys) -> None:
     assert capsys.readouterr().out.strip() == (
         f"Exported 1 conversation (2 messages) from {input_path} to {output_path} as sqlite"
     )
+
+
+def test_search_command_prints_json_results_from_sqlite(tmp_path, capsys) -> None:
+    input_path = tmp_path / "conversations.db"
+    write_conversations_sqlite(_searchable_conversations(), input_path)
+
+    exit_code = main(
+        [
+            "search",
+            "--input",
+            str(input_path),
+            "--query",
+            "Taildrop",
+            "--limit",
+            "1",
+        ]
+    )
+
+    assert exit_code == 0
+    assert capsys.readouterr().out == (
+        json.dumps(
+            {
+                "limit": 1,
+                "query": "Taildrop",
+                "result_count": 1,
+                "results": [
+                    {
+                        "conversation_id": "conv-2",
+                        "excerpt": "Taildrop release checklist",
+                        "message_count": 1,
+                        "source": "chatgpt",
+                        "title": "Taildrop release checklist",
+                    }
+                ],
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n"
+    )
+
+
+def _searchable_conversations() -> list[Conversation]:
+    return [
+        Conversation(
+            id="conv-1",
+            source="codex",
+            title="Ops sync",
+            participants=[
+                Participant(id="user", role="user"),
+                Participant(id="assistant", role="assistant"),
+            ],
+            messages=[
+                Message(
+                    id="msg-1",
+                    participant=Participant(id="user", role="user"),
+                    parts=[ContentPart(text="Check Taildrop access in staging.")],
+                    created_at="2024-03-10T09:00:01Z",
+                )
+            ],
+            created_at="2024-03-10T09:00:00Z",
+            updated_at="2024-03-10T09:05:00Z",
+        ),
+        Conversation(
+            id="conv-2",
+            source="chatgpt",
+            title="Taildrop release checklist",
+            participants=[
+                Participant(id="user", role="user"),
+                Participant(id="assistant", role="assistant"),
+            ],
+            messages=[
+                Message(
+                    id="msg-1",
+                    participant=Participant(id="assistant", role="assistant"),
+                    parts=[ContentPart(text="Summarize the release steps.")],
+                    created_at="2024-03-11T08:00:01Z",
+                )
+            ],
+            created_at="2024-03-11T08:00:00Z",
+            updated_at="2024-03-11T08:05:00Z",
+        ),
+    ]
