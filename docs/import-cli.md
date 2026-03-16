@@ -1,6 +1,6 @@
 # Import CLI
 
-`conversation-hub import` reads one supported export file, normalizes it through the selected connector, and writes normalized JSON output.
+`conversation-hub import` reads one supported export file or local state directory, hands it to the shared import pipeline, and writes normalized JSON output.
 
 ## Command
 
@@ -10,8 +10,8 @@ conversation-hub import --source SOURCE --input INPUT_PATH --output OUTPUT_PATH
 
 ## Arguments
 
-- `--source`: required source selector; supported values are `chatgpt` and `claude`
-- `--input`: required path to the source export file
+- `--source`: required source selector; supported values are `chatgpt`, `claude`, and `codex`
+- `--input`: required path to the source export file, a single Codex session JSONL file, or a `.codex` directory
 - `--output`: required path for the normalized JSON file that will be written
 
 Unsupported `--source` values are rejected by `argparse` with exit code `2`.
@@ -36,10 +36,25 @@ conversation-hub import \
   --output ./normalized/claude.json
 ```
 
+Codex local state:
+
+```bash
+conversation-hub import \
+  --source codex \
+  --input ~/.codex \
+  --output ./normalized/codex.json
+```
+
 Successful runs print a short summary:
 
 ```text
 Imported 12 conversations (248 messages) from chatgpt to ./normalized/chatgpt.json
+
+The command stays intentionally thin:
+- argparse validates `--source`, `--input`, and `--output`
+- the shared connector registry resolves the source adapter
+- `conversation_hub.pipelines.run_import()` executes the connector and returns normalized conversations plus summary counts
+- the CLI serializes the normalized conversations and writes the JSON file
 ```
 
 ## Output structure
@@ -92,3 +107,4 @@ The command writes a JSON array. Each item is one normalized conversation with t
 - `messages` are written in chronological order, even if the source export stored them differently.
 - `parts` preserve structured content so non-text items can keep metadata without being flattened into plain text.
 - `metadata` fields are passed through as JSON-compatible dictionaries for downstream processing.
+- Codex imports preserve session provenance in `metadata.codex`, including the originating `session_file` and useful local metadata such as `cwd` and `cli_version`.

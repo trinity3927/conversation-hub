@@ -26,10 +26,26 @@ It should be kept current as the project evolves.
 - File-based importers implemented
   - ChatGPT export connector
   - Claude export connector
+  - Codex CLI local-state connector
 - Import CLI implemented
-  - `conversation-hub import --source {chatgpt,claude} --input PATH --output PATH`
+  - `conversation-hub import --source {chatgpt,claude,codex} --input PATH --output PATH`
+- Shared connector registry implemented for import sources
+- Reusable import pipeline boundary implemented
+  - resolves a source from the registry
+  - runs the connector
+  - returns normalized conversations plus conversation/message counts
 - JSON serialization for normalized output implemented
-- Tests added for schema, connectors, CLI, and serialization
+- Normalized JSON loading implemented
+  - reconstructs `Conversation`, `Message`, `Participant`, and `ContentPart` objects from normalized JSON
+- Reusable analysis pipeline implemented
+  - returns deterministic default outputs for summary counts, source patterns, recurring projects/goals, important entities, reusable prompts, repeated preferences/constraints, and unresolved threads
+- Analyze CLI implemented
+  - `conversation-hub analyze --input PATH --output PATH`
+- Default local SQLite storage implemented
+  - reusable `write_conversations_sqlite()` writer for deterministic `conversations`, `participants`, `messages`, and `content_parts` tables
+- Export CLI implemented
+  - `conversation-hub export --format sqlite --input PATH --output PATH`
+- Tests added for schema, connectors, import pipeline, analysis pipeline, CLI, serialization, and normalized JSON loading
 - Development logging started in `logs/`
 - Added high-level project tracker in `to-do.md`
 
@@ -50,18 +66,8 @@ It should be kept current as the project evolves.
   - exported files/folders
   - local CLI state folders
   - provider-specific parsers
-- Implement a third real importer focused on local-first state
-  - Codex CLI local state
-  - or another CLI tool with real local session files
-- Add normalization pipeline boundaries
-- Add default analysis outputs
-  - recurring projects/goals
-  - important entities/repos/products
-  - reusable prompts/workflows
-  - repeated preferences/constraints
-  - unresolved threads
-- Add default local storage in SQLite
-- Add local search/report/export commands
+- Add local search/report commands over normalized JSON and SQLite storage
+- Add additional export targets after SQLite proves out
 
 ## Later
 - Add optional embeddings/vector layer
@@ -81,7 +87,6 @@ It should be kept current as the project evolves.
 - Over-engineered memory systems before ingestion is reliable
 
 ## Open questions
-- Which local-first importer should be the 3rd solid source after ChatGPT and Claude?
 - What exact canonical entities should be first-class in the schema now versus later?
 - What should the first memory extraction outputs look like in the CLI?
-- What should the default SQLite layout be?
+- What should the next export target after SQLite be?

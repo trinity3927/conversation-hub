@@ -23,8 +23,11 @@ dist/
 .logs/
 # Put local conversation exports here so they never enter git
 
-# Export archives
+# Export archives and local storage outputs
 *.zip
+*.db
+*.sqlite
+*.sqlite3
 
 # OS/editor
 .DS_Store
