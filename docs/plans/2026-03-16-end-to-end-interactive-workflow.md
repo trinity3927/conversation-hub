@@ -1,6 +1,6 @@
 # End-to-end interactive browse workflow plan
 
-> **For Hermes:** Use Codex and strict TDD to implement this plan.
+> Implementation note: follow strict TDD for this plan.
 
 **Goal:** Make `conversation-hub browse` a no-required-args, end-to-end interactive workflow that can prompt for provider import, then visibly browse and analyze conversations in the terminal.
 
@@ -27,7 +27,7 @@
 - Add a CLI test for `conversation-hub browse` with no `--input`, using `monkeypatch` on `builtins.input`.
 
 **Step 2: Run tests to verify failure**
-Run: `PYTHONPATH=src /home/sindri/.hermes/hermes-agent/venv/bin/python -m pytest tests/test_interactive_workflow.py tests/test_cli.py::test_browse_command_without_input_runs_interactive_workflow -q`
+Run: `PYTHONPATH=src python -m pytest tests/test_interactive_workflow.py tests/test_cli.py::test_browse_command_without_input_runs_interactive_workflow -q`
 Expected: FAIL because the interactive workflow controller does not exist yet.
 
 ### Task 2: Implement interactive workflow controller
@@ -56,7 +56,7 @@ Expected: FAIL because the interactive workflow controller does not exist yet.
 - Keep everything stdlib-only and testable with injected I/O
 
 **Step 3: Run focused tests**
-Run: `PYTHONPATH=src /home/sindri/.hermes/hermes-agent/venv/bin/python -m pytest tests/test_interactive_workflow.py tests/test_interactive_browse.py -q`
+Run: `PYTHONPATH=src python -m pytest tests/test_interactive_workflow.py tests/test_interactive_browse.py -q`
 Expected: PASS
 
 ### Task 3: Improve browse session utility commands
@@ -80,7 +80,7 @@ Expected: PASS
 - Keep outputs deterministic for tests
 
 **Step 3: Run focused tests**
-Run: `PYTHONPATH=src /home/sindri/.hermes/hermes-agent/venv/bin/python -m pytest tests/test_interactive_browse.py tests/test_cli.py -q`
+Run: `PYTHONPATH=src python -m pytest tests/test_interactive_browse.py tests/test_cli.py -q`
 Expected: PASS
 
 ### Task 4: Wire CLI browse to support both direct and no-args modes
@@ -97,7 +97,7 @@ Expected: PASS
 - If omitted: launch the interactive workflow controller
 
 **Step 2: Run focused CLI tests**
-Run: `PYTHONPATH=src /home/sindri/.hermes/hermes-agent/venv/bin/python -m pytest tests/test_cli.py tests/test_interactive_workflow.py tests/test_interactive_browse.py -q`
+Run: `PYTHONPATH=src python -m pytest tests/test_cli.py tests/test_interactive_workflow.py tests/test_interactive_browse.py -q`
 Expected: PASS
 
 ### Task 5: Update docs, tracking, and logs
@@ -120,5 +120,5 @@ Expected: PASS
 - Log failing tests, final test results, and design decisions in `logs/2026-03-16.md`
 
 **Step 3: Run the full suite**
-Run: `PYTHONPATH=src /home/sindri/.hermes/hermes-agent/venv/bin/python -m pytest tests/ -q`
+Run: `PYTHONPATH=src python -m pytest tests/ -q`
 Expected: PASS

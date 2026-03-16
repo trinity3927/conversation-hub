@@ -1,6 +1,6 @@
 # Default analysis outputs implementation plan
 
-> **For Hermes:** Use Codex and strict TDD to implement this plan.
+> Implementation note: follow strict TDD for this plan.
 
 **Goal:** Add a first `conversation-hub analyze` command that reads normalized conversation JSON and writes a deterministic analysis report covering the handover's default output categories.
 
@@ -31,7 +31,7 @@
 - Use deterministic sample data with repeated project/prompt/constraint language so the expected report is easy to assert.
 
 **Step 2: Run test to verify failure**
-Run: `PYTHONPATH=src /home/sindri/.hermes/hermes-agent/venv/bin/python -m pytest tests/test_analysis_pipeline.py tests/test_storage_json_import.py -q`
+Run: `PYTHONPATH=src python -m pytest tests/test_analysis_pipeline.py tests/test_storage_json_import.py -q`
 Expected: FAIL because the loader and/or analysis pipeline do not exist yet.
 
 ### Task 2: Implement normalized JSON loading and analysis pipeline
@@ -62,7 +62,7 @@ Expected: FAIL because the loader and/or analysis pipeline do not exist yet.
 - Keep heuristics simple, local, and testable.
 
 **Step 3: Run focused tests**
-Run: `PYTHONPATH=src /home/sindri/.hermes/hermes-agent/venv/bin/python -m pytest tests/test_analysis_pipeline.py tests/test_storage_json_import.py -q`
+Run: `PYTHONPATH=src python -m pytest tests/test_analysis_pipeline.py tests/test_storage_json_import.py -q`
 Expected: PASS
 
 ### Task 3: Add failing CLI analysis test and wire the command
@@ -81,7 +81,7 @@ Expected: PASS
   - prints a short summary line
 
 **Step 2: Run the focused CLI analysis test**
-Run: `PYTHONPATH=src /home/sindri/.hermes/hermes-agent/venv/bin/python -m pytest tests/test_cli.py::test_analyze_command_writes_analysis_report -q`
+Run: `PYTHONPATH=src python -m pytest tests/test_cli.py::test_analyze_command_writes_analysis_report -q`
 Expected: FAIL because the command is not implemented yet.
 
 **Step 3: Implement the CLI wiring**
@@ -92,7 +92,7 @@ Expected: FAIL because the command is not implemented yet.
 - Print a concise summary
 
 **Step 4: Run focused CLI + pipeline tests**
-Run: `PYTHONPATH=src /home/sindri/.hermes/hermes-agent/venv/bin/python -m pytest tests/test_cli.py tests/test_analysis_pipeline.py tests/test_storage_json_import.py -q`
+Run: `PYTHONPATH=src python -m pytest tests/test_cli.py tests/test_analysis_pipeline.py tests/test_storage_json_import.py -q`
 Expected: PASS
 
 ### Task 4: Update docs, project tracking, and logs
@@ -115,5 +115,5 @@ Expected: PASS
 - Log test commands, failures, final results, and decisions in `logs/2026-03-16.md`.
 
 **Step 3: Run the full suite**
-Run: `PYTHONPATH=src /home/sindri/.hermes/hermes-agent/venv/bin/python -m pytest tests/ -q`
+Run: `PYTHONPATH=src python -m pytest tests/ -q`
 Expected: PASS

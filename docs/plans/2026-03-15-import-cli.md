@@ -1,6 +1,6 @@
 # Conversation Hub import CLI plan
 
-> For Hermes: delegate implementation to Codex and require strict TDD.
+> Implementation note: follow strict TDD for this plan.
 
 Goal: add a real CLI import command that reads a supported source export, normalizes it through the existing connectors, and writes normalized JSON output.
 

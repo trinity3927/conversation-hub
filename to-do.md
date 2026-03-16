@@ -60,6 +60,10 @@ It should be kept current as the project evolves.
   - selected-conversation metadata/tags view
   - no-args browse workflow can now open SQLite exports before entering browse
   - interactive report omits noisy raw `top_keywords` output
+  - minimal home screen with recent datasets and remembered provider paths
+  - paginated conversation cards with preview, likely task, and artifact rows
+  - non-destructive in-view search prompt plus clearer browse status lines
+  - high-signal report sections for quick summary, tasks, unresolved asks, artifacts, and source comparison
 - SQLite read path implemented for browse workflow
   - reusable `load_conversations_sqlite()` loader for exported conversation databases
 - Tests added for schema, connectors, import pipeline, analysis pipeline, CLI, serialization, and normalized JSON loading
@@ -70,23 +74,16 @@ It should be kept current as the project evolves.
 - Added high-level project tracker in `to-do.md`
 
 ## Now
-- Align the repo with the handover direction as the authoritative prompt
-- Preserve useful existing work while reframing the MVP around ingestion + normalization + memory extraction
-- Define one durable canonical schema that can grow toward:
-  - sources
-  - conversations
-  - messages
-  - artifacts
-  - entities
-  - memories
-- Add macro tracking for the fastest CLI-first MVP path
+- Keep the CLI MVP stable while expanding source coverage and memory extraction quality
+- Preserve the current canonical schema while deciding which entities should become first-class next
+- Use the current local JSON + SQLite paths as the stable base for the next feature pass
 
 ## Next
 - Add importer/adapter system explicitly oriented around:
   - exported files/folders
   - local CLI state folders
   - provider-specific parsers
-- Expand local search/reporting beyond the first SQLite-backed text search and first interactive browser
+- Expand local search/reporting beyond the first SQLite-backed text search and current interactive browser
 - Add additional export targets after SQLite proves out
 
 ## Later

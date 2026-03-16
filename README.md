@@ -14,7 +14,17 @@ source .venv/bin/activate
 pip install -e .
 ```
 
-Development note: in this workspace, `pytest` is available from `/home/sindri/.hermes/hermes-agent/venv/bin/python`, so test runs should use `PYTHONPATH=src /home/sindri/.hermes/hermes-agent/venv/bin/python -m pytest ...`.
+For local development and tests, install the dev extras:
+
+```bash
+pip install -e ".[dev]"
+```
+
+Run tests with:
+
+```bash
+PYTHONPATH=src python -m pytest
+```
 
 ## Supported sources
 
@@ -64,20 +74,28 @@ See [docs/analyze-cli.md](docs/analyze-cli.md) for the report shape and heuristi
 
 ## Browse CLI
 
-The CLI can browse local conversations in a prompt-driven terminal session. It supports both direct mode for normalized JSON and a no-required-args workflow that can open normalized JSON, import from `chatgpt`, `claude`, or `codex`, or open a local SQLite export before dropping into the same browser.
+The CLI can browse local conversations in a prompt-driven terminal session. It supports both direct mode for normalized JSON and a no-required-args workflow that can open recent datasets, import from `chatgpt`, `claude`, or `codex`, open normalized JSON, or open a local SQLite export before dropping into the same browser.
 
 ```bash
 conversation-hub browse
 conversation-hub browse --input ./normalized/conversations.json
 ```
 
-If you choose provider import in the no-args flow, the workflow prompts for the source path and normalized output path. Leaving the output path blank writes a human-readable JSON file under `./.conversation-hub/normalized/<provider>.json`.
+If you choose provider import in the no-args flow, the workflow prompts for the source path and normalized output path. Leaving the output path blank writes a human-readable JSON file under `./.conversation-hub/normalized/<provider>.json`. The launcher also keeps a local JSON state file under `./.conversation-hub/state.json` so it can remember recent datasets and the last provider paths you used.
+
+The no-args home screen shows:
+
+- recent datasets you can reopen by number
+- remembered defaults such as the last browse filter and provider import paths
+- quick actions for provider import, normalized JSON, and SQLite
 
 Main list commands:
 
 - type a conversation number to open it
+- type `n` or `p` to move between pages
 - type `r` to print an overall report for the current view
 - type `f` to filter the current conversation list by keyword
+- type `/` to set a non-destructive search query for the current filtered view
 - type `q` to quit
 
 Selected conversation commands:
@@ -88,7 +106,7 @@ Selected conversation commands:
 - type `b` to go back
 - type `q` to quit
 
-The browser now prints visible command help in both the conversation list and selected conversation views, uses richer previews in the list, and keeps the in-terminal report focused on higher-signal sections instead of noisy raw keyword dumps.
+The browser prints visible command help in both the conversation list and selected conversation views, uses paged conversation cards with previews/tasks/artifacts, and keeps the in-terminal report focused on higher-signal sections such as quick summary, likely tasks, unresolved asks, artifacts, and source comparison instead of noisy raw keyword dumps.
 
 Internally, `conversation-hub browse --input ...` reloads normalized JSON with `conversation_hub.storage.load_conversations_json()` and hands the conversations to the reusable interactive session in `conversation_hub.interactive.run_browse_session()`. Running `conversation-hub browse` without `--input` dispatches into `conversation_hub.interactive.run_browse_workflow()`, which handles interactive loading/import before opening the same browser session. The SQLite branch rehydrates conversations through `conversation_hub.storage.load_conversations_sqlite()`.
 

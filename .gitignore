@@ -5,6 +5,7 @@ __pycache__/
 .venv/
 venv/
 .env
+.env.*
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
@@ -29,6 +30,9 @@ dist/
 *.db
 *.sqlite
 *.sqlite3
+*.pem
+*.key
+*.crt
 
 # OS/editor
 .DS_Store

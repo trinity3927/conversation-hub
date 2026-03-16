@@ -1,6 +1,6 @@
 # Local search CLI implementation plan
 
-> **For Hermes:** Use Codex and strict TDD to implement this plan.
+> Implementation note: follow strict TDD for this plan.
 
 **Goal:** Add the first usable local search command so the user can query stored conversation data immediately.
 
@@ -25,7 +25,7 @@
 - Add a test that respects `limit`.
 
 **Step 2: Run tests to verify failure**
-Run: `PYTHONPATH=src /home/sindri/.hermes/hermes-agent/venv/bin/python -m pytest tests/test_storage_sqlite_search.py -q`
+Run: `PYTHONPATH=src python -m pytest tests/test_storage_sqlite_search.py -q`
 Expected: FAIL because the SQLite search module does not exist yet.
 
 ### Task 2: Implement reusable SQLite search helper
@@ -45,7 +45,7 @@ Expected: FAIL because the SQLite search module does not exist yet.
 - Return deterministic results with excerpts and counts.
 
 **Step 2: Run focused tests**
-Run: `PYTHONPATH=src /home/sindri/.hermes/hermes-agent/venv/bin/python -m pytest tests/test_storage_sqlite.py tests/test_storage_sqlite_search.py -q`
+Run: `PYTHONPATH=src python -m pytest tests/test_storage_sqlite.py tests/test_storage_sqlite_search.py -q`
 Expected: PASS
 
 ### Task 3: Add failing CLI search test and wire the command
@@ -64,7 +64,7 @@ Expected: PASS
   - supports `--limit`
 
 **Step 2: Run focused CLI test to verify failure**
-Run: `PYTHONPATH=src /home/sindri/.hermes/hermes-agent/venv/bin/python -m pytest tests/test_cli.py::test_search_command_prints_json_results_from_sqlite -q`
+Run: `PYTHONPATH=src python -m pytest tests/test_cli.py::test_search_command_prints_json_results_from_sqlite -q`
 Expected: FAIL because the command is not implemented yet.
 
 **Step 3: Implement CLI wiring**
@@ -77,7 +77,7 @@ Expected: FAIL because the command is not implemented yet.
 - Print JSON search results to stdout
 
 **Step 4: Run focused tests**
-Run: `PYTHONPATH=src /home/sindri/.hermes/hermes-agent/venv/bin/python -m pytest tests/test_cli.py tests/test_storage_sqlite_search.py -q`
+Run: `PYTHONPATH=src python -m pytest tests/test_cli.py tests/test_storage_sqlite_search.py -q`
 Expected: PASS
 
 ### Task 4: Update docs, tracking, and logs
@@ -99,5 +99,5 @@ Expected: PASS
 - Log failures, commands, results, and decisions in `logs/2026-03-16.md`
 
 **Step 3: Run the full suite**
-Run: `PYTHONPATH=src /home/sindri/.hermes/hermes-agent/venv/bin/python -m pytest tests/ -q`
+Run: `PYTHONPATH=src python -m pytest tests/ -q`
 Expected: PASS

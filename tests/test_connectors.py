@@ -147,7 +147,7 @@ def test_codex_local_state_connector_parses_single_session_file(tmp_path) -> Non
                         "payload": {
                             "id": "session-1",
                             "timestamp": "2026-03-16T02:15:14.189Z",
-                            "cwd": "/home/sindri/taildrop",
+                            "cwd": "/workspace/taildrop",
                             "cli_version": "0.114.0",
                             "source": "cli",
                             "model_provider": "openai",
@@ -192,7 +192,7 @@ def test_codex_local_state_connector_parses_single_session_file(tmp_path) -> Non
     assert conversation.updated_at == datetime(2026, 3, 16, 2, 16, 24, 332000, tzinfo=timezone.utc)
     assert conversation.metadata == {
         "codex": {
-            "cwd": "/home/sindri/taildrop",
+            "cwd": "/workspace/taildrop",
             "cli_version": "0.114.0",
             "model_provider": "openai",
             "session_source": "cli",

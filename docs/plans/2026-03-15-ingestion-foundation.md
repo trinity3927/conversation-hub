@@ -1,6 +1,6 @@
 # Conversation Hub ingestion foundation plan
 
-> For Hermes: follow test-first development for each code change.
+> Implementation note: follow strict TDD for this plan.
 
 Goal: create the GitHub remote, strengthen the normalized conversation schema, and scaffold the first practical source connectors.
 
@@ -10,7 +10,7 @@ Tech stack: Python 3.11, dataclasses, pathlib, json, pytest.
 
 ---
 
-1. Create or attach the GitHub remote for `trinity3927/conversation-hub`, push `main`, and confirm the remote URL.
+1. Create or attach the GitHub remote for `your-org/conversation-hub`, push `main`, and confirm the remote URL.
 2. Add tests that describe the normalized schema behavior we want:
    - messages can expose joined text content from structured parts
    - conversations can return messages in chronological order

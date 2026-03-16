@@ -1,6 +1,6 @@
 # SQLite storage export implementation plan
 
-> **For Hermes:** Use Codex and strict TDD to implement this plan.
+> Implementation note: follow strict TDD for this plan.
 
 **Goal:** Add the first SQLite-backed local storage path by exporting normalized conversations into a deterministic SQLite database.
 
@@ -26,7 +26,7 @@
 - Add a test that writing the same dataset twice replaces the managed rows cleanly instead of duplicating them.
 
 **Step 2: Run test to verify failure**
-Run: `PYTHONPATH=src /home/sindri/.hermes/hermes-agent/venv/bin/python -m pytest tests/test_storage_sqlite.py -q`
+Run: `PYTHONPATH=src python -m pytest tests/test_storage_sqlite.py -q`
 Expected: FAIL because the SQLite storage module does not exist yet.
 
 ### Task 2: Implement reusable SQLite storage writer
@@ -51,7 +51,7 @@ Expected: FAIL because the SQLite storage module does not exist yet.
 - Return a small structured result with conversation/message counts and output path.
 
 **Step 3: Run focused storage tests**
-Run: `PYTHONPATH=src /home/sindri/.hermes/hermes-agent/venv/bin/python -m pytest tests/test_storage_sqlite.py tests/test_storage_json_import.py -q`
+Run: `PYTHONPATH=src python -m pytest tests/test_storage_sqlite.py tests/test_storage_json_import.py -q`
 Expected: PASS
 
 ### Task 3: Add failing export CLI test and wire the command
@@ -70,7 +70,7 @@ Expected: PASS
   - prints a short summary
 
 **Step 2: Run focused CLI test to verify failure**
-Run: `PYTHONPATH=src /home/sindri/.hermes/hermes-agent/venv/bin/python -m pytest tests/test_cli.py::test_export_command_writes_sqlite_database -q`
+Run: `PYTHONPATH=src python -m pytest tests/test_cli.py::test_export_command_writes_sqlite_database -q`
 Expected: FAIL because the command is not implemented yet.
 
 **Step 3: Implement CLI wiring**
@@ -81,7 +81,7 @@ Expected: FAIL because the command is not implemented yet.
 - Print a concise summary
 
 **Step 4: Run focused CLI and storage tests**
-Run: `PYTHONPATH=src /home/sindri/.hermes/hermes-agent/venv/bin/python -m pytest tests/test_cli.py tests/test_storage_sqlite.py -q`
+Run: `PYTHONPATH=src python -m pytest tests/test_cli.py tests/test_storage_sqlite.py -q`
 Expected: PASS
 
 ### Task 4: Update docs, project tracking, and logs
@@ -104,5 +104,5 @@ Expected: PASS
 - Log TDD failures, commands, results, and design decisions in `logs/2026-03-16.md`
 
 **Step 3: Run the full suite**
-Run: `PYTHONPATH=src /home/sindri/.hermes/hermes-agent/venv/bin/python -m pytest tests/ -q`
+Run: `PYTHONPATH=src python -m pytest tests/ -q`
 Expected: PASS

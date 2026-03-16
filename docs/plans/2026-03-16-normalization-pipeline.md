@@ -1,6 +1,6 @@
 # Import pipeline boundary implementation plan
 
-> **For Hermes:** Use Codex and strict TDD to implement this plan.
+> Implementation note: follow strict TDD for this plan.
 
 **Goal:** Add an explicit reusable import pipeline boundary so source resolution, connector execution, and normalized import results are no longer embedded directly in the CLI.
 
@@ -28,7 +28,7 @@
   - source name and input path metadata
 
 **Step 2: Run test to verify failure**
-Run: `PYTHONPATH=src /home/sindri/.hermes/hermes-agent/venv/bin/python -m pytest tests/test_import_pipeline.py -q`
+Run: `PYTHONPATH=src python -m pytest tests/test_import_pipeline.py -q`
 Expected: FAIL because the pipeline module does not exist yet.
 
 **Step 3: Do not implement production code yet**
@@ -56,7 +56,7 @@ Expected: FAIL because the pipeline module does not exist yet.
 - Compute conversation/message counts in the pipeline
 
 **Step 3: Run focused tests**
-Run: `PYTHONPATH=src /home/sindri/.hermes/hermes-agent/venv/bin/python -m pytest tests/test_import_pipeline.py tests/test_connectors.py -q`
+Run: `PYTHONPATH=src python -m pytest tests/test_import_pipeline.py tests/test_connectors.py -q`
 Expected: PASS
 
 ### Task 3: Refactor the CLI to use the pipeline
@@ -74,7 +74,7 @@ Expected: PASS
 - Print the summary using `ImportResult.conversation_count` and `ImportResult.message_count`
 
 **Step 2: Run focused tests**
-Run: `PYTHONPATH=src /home/sindri/.hermes/hermes-agent/venv/bin/python -m pytest tests/test_cli.py tests/test_import_pipeline.py -q`
+Run: `PYTHONPATH=src python -m pytest tests/test_cli.py tests/test_import_pipeline.py -q`
 Expected: PASS
 
 ### Task 4: Refresh docs and logs
@@ -97,5 +97,5 @@ Expected: PASS
 - Log commands, failures, final test results, and decisions in `logs/2026-03-16.md`
 
 **Step 3: Run the full suite**
-Run: `PYTHONPATH=src /home/sindri/.hermes/hermes-agent/venv/bin/python -m pytest tests/ -q`
+Run: `PYTHONPATH=src python -m pytest tests/ -q`
 Expected: PASS

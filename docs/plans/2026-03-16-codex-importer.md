@@ -1,6 +1,6 @@
 # Codex local-state importer implementation plan
 
-> For Hermes: follow strict TDD for each code change.
+> Implementation note: follow strict TDD for this plan.
 
 Goal: add a third real importer for Codex CLI local session state so conversation-hub can ingest local-first agent history, not just exported provider files.
 

@@ -201,7 +201,7 @@ def test_import_command_writes_normalized_codex_json(tmp_path, capsys) -> None:
                         "payload": {
                             "id": "session-1",
                             "timestamp": "2026-03-16T02:15:14.189Z",
-                            "cwd": "/home/sindri/taildrop",
+                            "cwd": "/workspace/taildrop",
                             "cli_version": "0.114.0",
                             "source": "cli",
                             "model_provider": "openai",
@@ -300,7 +300,7 @@ def test_import_command_writes_normalized_codex_json(tmp_path, capsys) -> None:
             "tags": [],
             "metadata": {
                 "codex": {
-                    "cwd": "/home/sindri/taildrop",
+                    "cwd": "/workspace/taildrop",
                     "cli_version": "0.114.0",
                     "model_provider": "openai",
                     "session_source": "cli",
@@ -628,12 +628,13 @@ def test_browse_command_runs_interactive_session(tmp_path, capsys, monkeypatch) 
     assert exit_code == 0
     output = capsys.readouterr().out
     assert "Conversation Browser" in output
+    assert "Mode: browse list" in output
     assert "1. Taildrop release checklist" in output
-    assert "Main commands" in output
-    assert "[number] open conversation" in output
-    assert "Conversation commands" in output
+    assert "Legend: [number open] [n next] [p prev] [f filter] [/ search] [r report] [q quit]" in output
+    assert "Mode: conversation detail" in output
+    assert "Operators: [m messages] [a report] [t metadata] [b back] [q quit]" in output
     assert "Analysis report for conversation conv-1" in output
-    assert "Conversations: 1" in output
+    assert "Quick summary" in output
     assert "top_keywords" not in output
 
 
@@ -645,11 +646,14 @@ def test_browse_command_without_input_runs_interactive_workflow(capsys, monkeypa
 
     assert exit_code == 0
     output = capsys.readouterr().out
-    assert "Browse launcher" in output
-    assert "1. Open an existing normalized JSON file" in output
-    assert "2. Import from a provider and browse it now" in output
-    assert "3. Open a local SQLite export" in output
-    assert "Workflow command [1, 2, 3, q]:" in output
+    assert "Conversation Hub" in output
+    assert "Minimal home" in output
+    assert "Recent datasets" in output
+    assert "Quick actions" in output
+    assert "i import provider export" in output
+    assert "j open normalized JSON" in output
+    assert "s open local SQLite export" in output
+    assert "Home command [recent number, i, j, s, q]:" in output
     assert "Quit workflow." in output
 
 

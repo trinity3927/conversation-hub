@@ -1,6 +1,6 @@
 # Interactive CLI polish plan
 
-> **For Hermes:** Use Codex and strict TDD to implement this plan.
+> Implementation note: follow strict TDD for this plan.
 
 **Goal:** Make the interactive CLI feel substantially more visible, guided, and polished, while keeping the workflow fully end-to-end from import/load through browsing and per-conversation analysis.
 
@@ -26,7 +26,7 @@
 - Add a CLI test that `conversation-hub browse` no-args mode visibly offers all entry options.
 
 **Step 2: Run focused tests to verify failure**
-Run: `PYTHONPATH=src /home/sindri/.hermes/hermes-agent/venv/bin/python -m pytest tests/test_interactive_browse.py tests/test_interactive_workflow.py tests/test_cli.py -q`
+Run: `PYTHONPATH=src python -m pytest tests/test_interactive_browse.py tests/test_interactive_workflow.py tests/test_cli.py -q`
 Expected: FAIL because the current UI is not polished enough yet.
 
 ### Task 2: Improve session presentation and discoverability
@@ -59,7 +59,7 @@ Expected: FAIL because the current UI is not polished enough yet.
   - `n` / `c` for next/back to list pages if pagination becomes necessary
 
 **Step 4: Run focused tests**
-Run: `PYTHONPATH=src /home/sindri/.hermes/hermes-agent/venv/bin/python -m pytest tests/test_interactive_browse.py -q`
+Run: `PYTHONPATH=src python -m pytest tests/test_interactive_browse.py -q`
 Expected: PASS
 
 ### Task 3: Expand entry workflow options
@@ -83,7 +83,7 @@ Expected: PASS
 - Enter the same browse session after loading
 
 **Step 3: Run focused workflow tests**
-Run: `PYTHONPATH=src /home/sindri/.hermes/hermes-agent/venv/bin/python -m pytest tests/test_interactive_workflow.py -q`
+Run: `PYTHONPATH=src python -m pytest tests/test_interactive_workflow.py -q`
 Expected: PASS
 
 ### Task 4: Keep CLI thin and update docs/logs
@@ -106,5 +106,5 @@ Expected: PASS
 - Document visible commands shown in the UI
 
 **Step 3: Run full suite**
-Run: `PYTHONPATH=src /home/sindri/.hermes/hermes-agent/venv/bin/python -m pytest tests/ -q`
+Run: `PYTHONPATH=src python -m pytest tests/ -q`
 Expected: PASS

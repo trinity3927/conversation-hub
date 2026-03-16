@@ -1,6 +1,6 @@
 # Interactive browse CLI implementation plan
 
-> **For Hermes:** Use Codex and strict TDD to implement this plan.
+> Implementation note: follow strict TDD for this plan.
 
 **Goal:** Add a prompt-driven terminal browse mode so the user can visibly explore conversations, run an overall report, and trigger one-off analysis for a selected conversation.
 
@@ -27,7 +27,7 @@
 - Add a CLI test for `conversation-hub browse --input <normalized.json>` using `monkeypatch` on `builtins.input`.
 
 **Step 2: Run tests to verify failure**
-Run: `PYTHONPATH=src /home/sindri/.hermes/hermes-agent/venv/bin/python -m pytest tests/test_interactive_browse.py tests/test_cli.py::test_browse_command_runs_interactive_session -q`
+Run: `PYTHONPATH=src python -m pytest tests/test_interactive_browse.py tests/test_cli.py::test_browse_command_runs_interactive_session -q`
 Expected: FAIL because the interactive browser and CLI subcommand do not exist yet.
 
 ### Task 2: Implement reusable interactive browser module
@@ -56,7 +56,7 @@ Expected: FAIL because the interactive browser and CLI subcommand do not exist y
 - Reuse `run_analysis()` for overall and one-conversation analysis, but render the output in a readable terminal format.
 
 **Step 3: Run focused tests**
-Run: `PYTHONPATH=src /home/sindri/.hermes/hermes-agent/venv/bin/python -m pytest tests/test_interactive_browse.py -q`
+Run: `PYTHONPATH=src python -m pytest tests/test_interactive_browse.py -q`
 Expected: PASS
 
 ### Task 3: Add CLI browse command
@@ -74,7 +74,7 @@ Expected: PASS
 - Call `run_browse_session()`
 
 **Step 2: Run focused CLI tests**
-Run: `PYTHONPATH=src /home/sindri/.hermes/hermes-agent/venv/bin/python -m pytest tests/test_cli.py tests/test_interactive_browse.py -q`
+Run: `PYTHONPATH=src python -m pytest tests/test_cli.py tests/test_interactive_browse.py -q`
 Expected: PASS
 
 ### Task 4: Update docs, tracking, and logs
@@ -96,5 +96,5 @@ Expected: PASS
 - Log test failures, commands, final results, and design decisions in `logs/2026-03-16.md`
 
 **Step 3: Run the full suite**
-Run: `PYTHONPATH=src /home/sindri/.hermes/hermes-agent/venv/bin/python -m pytest tests/ -q`
+Run: `PYTHONPATH=src python -m pytest tests/ -q`
 Expected: PASS
