@@ -627,10 +627,14 @@ def test_browse_command_runs_interactive_session(tmp_path, capsys, monkeypatch) 
 
     assert exit_code == 0
     output = capsys.readouterr().out
-    assert "Conversation browser" in output
+    assert "Conversation Browser" in output
     assert "1. Taildrop release checklist" in output
+    assert "Main commands" in output
+    assert "[number] open conversation" in output
+    assert "Conversation commands" in output
     assert "Analysis report for conversation conv-1" in output
     assert "Conversations: 1" in output
+    assert "top_keywords" not in output
 
 
 def test_browse_command_without_input_runs_interactive_workflow(capsys, monkeypatch) -> None:
@@ -641,7 +645,11 @@ def test_browse_command_without_input_runs_interactive_workflow(capsys, monkeypa
 
     assert exit_code == 0
     output = capsys.readouterr().out
-    assert "Choose how to load conversations" in output
+    assert "Browse launcher" in output
+    assert "1. Open an existing normalized JSON file" in output
+    assert "2. Import from a provider and browse it now" in output
+    assert "3. Open a local SQLite export" in output
+    assert "Workflow command [1, 2, 3, q]:" in output
     assert "Quit workflow." in output
 
 

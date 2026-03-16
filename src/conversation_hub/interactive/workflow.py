@@ -8,16 +8,21 @@ from conversation_hub.connectors import available_sources
 from conversation_hub.interactive.browse import run_browse_session
 from conversation_hub.models.schema import Conversation
 from conversation_hub.pipelines import ImportResult, run_import
-from conversation_hub.storage import conversations_to_list, load_conversations_json
+from conversation_hub.storage import (
+    conversations_to_list,
+    load_conversations_json,
+    load_conversations_sqlite,
+)
 
 
 InputFn = Callable[[], str]
 OutputFn = Callable[[object], None]
 ImportRunner = Callable[[str, Path], ImportResult]
 BrowseRunner = Callable[[list[Conversation], InputFn | None, OutputFn | None], None]
-LoadRunner = Callable[[Path], list[Conversation]]
+JSONLoadRunner = Callable[[Path], list[Conversation]]
+SQLiteLoadRunner = Callable[[Path], list[Conversation]]
 
-_WORKFLOW_OPTIONS = ("1", "2", "q")
+_WORKFLOW_OPTIONS = ("1", "2", "3", "q")
 _DEFAULT_OUTPUT_DIRNAME = ".conversation-hub/normalized"
 
 
@@ -27,20 +32,22 @@ def run_browse_workflow(
     default_data_dir: Path | None = None,
     import_runner: ImportRunner = run_import,
     browse_runner: BrowseRunner = run_browse_session,
-    load_runner: LoadRunner = load_conversations_json,
+    json_load_runner: JSONLoadRunner = load_conversations_json,
+    sqlite_load_runner: SQLiteLoadRunner = load_conversations_sqlite,
 ) -> None:
     input_fn = input if input_fn is None else input_fn
     output_fn = print if output_fn is None else output_fn
     default_data_dir = Path.cwd() / _DEFAULT_OUTPUT_DIRNAME if default_data_dir is None else Path(default_data_dir)
 
     while True:
-        output_fn("Choose how to load conversations")
-        output_fn("================================")
+        output_fn("Browse launcher")
+        output_fn("===============")
         output_fn("1. Open an existing normalized JSON file")
         output_fn("2. Import from a provider and browse it now")
+        output_fn("3. Open a local SQLite export")
         output_fn("q. Quit")
 
-        command = _read_command("Workflow command [1, 2, q]:", input_fn, output_fn)
+        command = _read_command("Workflow command [1, 2, 3, q]:", input_fn, output_fn)
 
         if command == "q":
             output_fn("Quit workflow.")
@@ -50,10 +57,16 @@ def run_browse_workflow(
             conversations = _load_existing_conversations(
                 input_fn=input_fn,
                 output_fn=output_fn,
-                load_runner=load_runner,
+                load_runner=json_load_runner,
             )
             if conversations is not None:
-                _open_browser(conversations, input_fn, output_fn, browse_runner)
+                _open_browser(
+                    conversations,
+                    "normalized JSON",
+                    input_fn,
+                    output_fn,
+                    browse_runner,
+                )
                 return
             continue
 
@@ -63,10 +76,33 @@ def run_browse_workflow(
                 output_fn=output_fn,
                 default_data_dir=default_data_dir,
                 import_runner=import_runner,
-                load_runner=load_runner,
+                json_load_runner=json_load_runner,
             )
             if conversations is not None:
-                _open_browser(conversations, input_fn, output_fn, browse_runner)
+                _open_browser(
+                    conversations,
+                    "normalized JSON",
+                    input_fn,
+                    output_fn,
+                    browse_runner,
+                )
+                return
+            continue
+
+        if command == "3":
+            conversations = _load_existing_sqlite_export(
+                input_fn=input_fn,
+                output_fn=output_fn,
+                load_runner=sqlite_load_runner,
+            )
+            if conversations is not None:
+                _open_browser(
+                    conversations,
+                    "SQLite export",
+                    input_fn,
+                    output_fn,
+                    browse_runner,
+                )
                 return
             continue
 
@@ -76,7 +112,7 @@ def run_browse_workflow(
 def _load_existing_conversations(
     input_fn: InputFn,
     output_fn: OutputFn,
-    load_runner: LoadRunner,
+    load_runner: JSONLoadRunner,
 ) -> list[Conversation] | None:
     input_path = _read_required_path("Enter normalized JSON path:", input_fn, output_fn)
 
@@ -87,12 +123,26 @@ def _load_existing_conversations(
         return None
 
 
+def _load_existing_sqlite_export(
+    input_fn: InputFn,
+    output_fn: OutputFn,
+    load_runner: SQLiteLoadRunner,
+) -> list[Conversation] | None:
+    input_path = _read_required_path("Enter SQLite export path:", input_fn, output_fn)
+
+    try:
+        return load_runner(input_path)
+    except (OSError, ValueError) as exc:
+        output_fn(f"Could not load SQLite export: {exc}")
+        return None
+
+
 def _import_conversations_for_browse(
     input_fn: InputFn,
     output_fn: OutputFn,
     default_data_dir: Path,
     import_runner: ImportRunner,
-    load_runner: LoadRunner,
+    json_load_runner: JSONLoadRunner,
 ) -> list[Conversation] | None:
     source = _read_provider_choice(input_fn, output_fn)
     source_input_path = _read_required_path(f"Enter the source path for {source}:", input_fn, output_fn)
@@ -102,7 +152,7 @@ def _import_conversations_for_browse(
         result = import_runner(source, source_input_path)
         _write_normalized_json(result.conversations, output_path)
         output_fn(_format_import_summary(result, output_path))
-        return load_runner(output_path)
+        return json_load_runner(output_path)
     except (OSError, ValueError) as exc:
         output_fn(f"Could not import conversations: {exc}")
         return None
@@ -110,6 +160,7 @@ def _import_conversations_for_browse(
 
 def _open_browser(
     conversations: list[Conversation],
+    data_source_label: str,
     input_fn: InputFn,
     output_fn: OutputFn,
     browse_runner: BrowseRunner,
@@ -117,7 +168,7 @@ def _open_browser(
     conversation_count = len(conversations)
     output_fn(
         f"Opening browser for {conversation_count} "
-        f"{_pluralize(conversation_count, 'conversation')} from normalized JSON."
+        f"{_pluralize(conversation_count, 'conversation')} from {data_source_label}."
     )
     browse_runner(conversations, input_fn=input_fn, output_fn=output_fn)
 

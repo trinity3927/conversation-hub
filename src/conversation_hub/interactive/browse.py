@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from collections.abc import Callable
 from typing import Any
 
@@ -20,8 +21,8 @@ def run_browse_session(
     output_fn = print if output_fn is None else output_fn
 
     if not conversations:
-        output_fn("Conversation browser")
-        output_fn("====================")
+        _render_heading("Conversation Browser", output_fn)
+        output_fn("Loaded conversations: 0")
         output_fn("No conversations loaded.")
         output_fn("Quit browser.")
         return
@@ -60,6 +61,7 @@ def run_browse_session(
 
         if _run_conversation_session(
             conversation_number=conversation_index + 1,
+            total_conversations=len(visible_conversations),
             conversation=visible_conversations[conversation_index],
             input_fn=input_fn,
             output_fn=output_fn,
@@ -69,13 +71,19 @@ def run_browse_session(
 
 def _run_conversation_session(
     conversation_number: int,
+    total_conversations: int,
     conversation: Conversation,
     input_fn: InputFn,
     output_fn: OutputFn,
 ) -> bool:
     while True:
-        _render_conversation_details(conversation_number, conversation, output_fn)
-        command = _read_command("Conversation command [m, a, b, q]:", input_fn, output_fn)
+        _render_conversation_details(
+            conversation_number,
+            total_conversations,
+            conversation,
+            output_fn,
+        )
+        command = _read_command("Conversation command [m, a, t, b, q]:", input_fn, output_fn)
 
         if command == "q":
             output_fn("Quit browser.")
@@ -96,6 +104,10 @@ def _run_conversation_session(
             )
             continue
 
+        if command == "t":
+            _render_conversation_metadata(conversation, output_fn)
+            continue
+
         output_fn(f"Unrecognized command: {command or '(empty)'}")
 
 
@@ -104,31 +116,46 @@ def _render_conversation_list(
     output_fn: OutputFn,
     active_filter: str | None = None,
 ) -> None:
-    output_fn("Conversation browser")
-    output_fn("====================")
+    _render_heading("Conversation Browser", output_fn)
+    output_fn(f"Loaded conversations: {len(conversations)}")
     if active_filter:
         output_fn(f"Active filter: {active_filter}")
 
+    output_fn("")
+    _render_subheading("Conversation list", output_fn)
     if not conversations:
         output_fn("No conversations available in the current view.")
-        return
+    else:
+        for index, conversation in enumerate(conversations, start=1):
+            title = conversation.title or "(untitled)"
+            updated_at = _format_timestamp(conversation.updated_at) or "-"
+            output_fn(f"{index}. {title}")
+            output_fn(
+                f"   source: {conversation.source} | "
+                f"messages: {len(conversation.messages)} | updated: {updated_at}"
+            )
+            output_fn(f"   preview: {_conversation_preview(conversation)}")
 
-    for index, conversation in enumerate(conversations, start=1):
-        title = conversation.title or "(untitled)"
-        updated_at = _format_timestamp(conversation.updated_at) or "-"
-        output_fn(
-            f"{index}. {title} | source={conversation.source} | "
-            f"messages={len(conversation.messages)} | updated={updated_at}"
-        )
+    output_fn("")
+    _render_command_help(
+        "Main commands",
+        [
+            "[number] open conversation",
+            "r overall report for current view",
+            "f filter conversations by keyword",
+            "q quit browser",
+        ],
+        output_fn,
+    )
 
 
 def _render_conversation_details(
     conversation_number: int,
+    total_conversations: int,
     conversation: Conversation,
     output_fn: OutputFn,
 ) -> None:
-    output_fn(f"Conversation {conversation_number}")
-    output_fn("================")
+    _render_heading(f"Conversation {conversation_number} of {total_conversations}", output_fn)
     output_fn(f"ID: {conversation.id}")
     output_fn(f"Title: {conversation.title or '(untitled)'}")
     output_fn(f"Source: {conversation.source}")
@@ -137,12 +164,29 @@ def _render_conversation_details(
     output_fn(f"Created: {_format_timestamp(conversation.created_at) or '-'}")
     output_fn(f"Updated: {_format_timestamp(conversation.updated_at) or '-'}")
     output_fn(f"Tags: {_format_tags(conversation.tags)}")
+    output_fn(f"Preview: {_conversation_preview(conversation)}")
+    output_fn("")
+    _render_command_help(
+        "Conversation commands",
+        [
+            "m show messages",
+            "a analysis report",
+            "t metadata and tags",
+            "b back to conversation list",
+            "q quit browser",
+        ],
+        output_fn,
+    )
 
 
 def _render_messages(conversation: Conversation, output_fn: OutputFn) -> None:
-    output_fn(f"Messages for {conversation.id}")
-    output_fn("====================")
-    for index, message in enumerate(conversation.messages_in_chronological_order(), start=1):
+    _render_heading(f"Messages for {conversation.id}", output_fn)
+    messages = conversation.messages_in_chronological_order()
+    if not messages:
+        output_fn("(none)")
+        return
+
+    for index, message in enumerate(messages, start=1):
         role = message.role or "unknown"
         text = message.text_content or "(no text)"
         output_fn(f"{index}. [{role}] {text}")
@@ -152,8 +196,7 @@ def _render_analysis_report(title: str, report: AnalysisResult, output_fn: Outpu
     report_dict = report.to_dict()
     summary = report_dict["summary"]
 
-    output_fn(title)
-    output_fn("=" * len(title))
+    _render_heading(title, output_fn)
     output_fn(f"Conversations: {summary['conversation_count']}")
     output_fn(f"Messages: {summary['message_count']}")
     output_fn(f"Source counts: {_format_source_counts(summary['source_counts'])}")
@@ -163,8 +206,7 @@ def _render_analysis_report(title: str, report: AnalysisResult, output_fn: Outpu
         [
             (
                 f"{item['source']}: conversations={item['conversation_count']}, "
-                f"messages={item['message_count']}, "
-                f"top_keywords={_format_csv(item['top_keywords'])}"
+                f"messages={item['message_count']}"
             )
             for item in report_dict["source_patterns"]
         ],
@@ -216,14 +258,37 @@ def _render_analysis_report(title: str, report: AnalysisResult, output_fn: Outpu
 
 
 def _render_section(title: str, rows: list[str], output_fn: OutputFn) -> None:
-    output_fn(title)
-    output_fn("-" * len(title))
+    output_fn("")
+    _render_subheading(title, output_fn)
     if not rows:
         output_fn("(none)")
         return
 
     for row in rows:
         output_fn(f"- {row}")
+
+
+def _render_conversation_metadata(conversation: Conversation, output_fn: OutputFn) -> None:
+    output_fn("")
+    _render_subheading("Conversation metadata", output_fn)
+    output_fn(f"Tags: {_format_tags(conversation.tags)}")
+    output_fn(f"Metadata: {_format_metadata(conversation.metadata)}")
+
+
+def _render_heading(title: str, output_fn: OutputFn) -> None:
+    output_fn(title)
+    output_fn("=" * len(title))
+
+
+def _render_subheading(title: str, output_fn: OutputFn) -> None:
+    output_fn(title)
+    output_fn("-" * len(title))
+
+
+def _render_command_help(title: str, rows: list[str], output_fn: OutputFn) -> None:
+    _render_subheading(title, output_fn)
+    for row in rows:
+        output_fn(row)
 
 
 def _read_command(prompt: str, input_fn: InputFn, output_fn: OutputFn) -> str:
@@ -267,6 +332,18 @@ def _format_participants(conversation: Conversation) -> str:
         label = participant.display_name or participant.role or participant.id or "unknown"
         participant_labels.append(label)
     return _format_csv(participant_labels)
+
+
+def _conversation_preview(conversation: Conversation) -> str:
+    for message in conversation.messages_in_chronological_order():
+        text = _normalize_whitespace(message.text_content)
+        if text:
+            return _shorten(text, 88)
+
+    if conversation.title:
+        return _shorten(_normalize_whitespace(conversation.title), 88)
+
+    return "(no preview)"
 
 
 def _apply_conversation_filter(
@@ -315,3 +392,29 @@ def _pluralize(count: int, singular: str) -> str:
 
 def _format_tags(tags: list[str]) -> str:
     return _format_csv(tags)
+
+
+def _format_metadata(metadata: dict[str, Any]) -> str:
+    if not metadata:
+        return "(none)"
+
+    return ", ".join(
+        f"{key}={_format_metadata_value(metadata[key])}"
+        for key in sorted(metadata)
+    )
+
+
+def _format_metadata_value(value: Any) -> str:
+    if isinstance(value, str):
+        return value
+    return json.dumps(value, sort_keys=True)
+
+
+def _normalize_whitespace(text: str) -> str:
+    return " ".join(text.split())
+
+
+def _shorten(text: str, limit: int) -> str:
+    if len(text) <= limit:
+        return text
+    return f"{text[: limit - 3].rstrip()}..."

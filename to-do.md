@@ -54,6 +54,14 @@ It should be kept current as the project evolves.
   - `conversation-hub browse --input PATH` direct mode
   - reusable injected-I/O workflow/session modules over normalized JSON
   - overall report, keyword filtering, selected conversation details/messages, and one-conversation analysis
+- Interactive browse polish pass implemented
+  - explicit on-screen command help in list and selected-conversation views
+  - richer conversation previews and clearer terminal headings/sections
+  - selected-conversation metadata/tags view
+  - no-args browse workflow can now open SQLite exports before entering browse
+  - interactive report omits noisy raw `top_keywords` output
+- SQLite read path implemented for browse workflow
+  - reusable `load_conversations_sqlite()` loader for exported conversation databases
 - Tests added for schema, connectors, import pipeline, analysis pipeline, CLI, serialization, and normalized JSON loading
 - Interactive browse tests added
   - direct session tests with injected input/output functions

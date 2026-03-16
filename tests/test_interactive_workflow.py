@@ -5,7 +5,7 @@ from pathlib import Path
 
 from conversation_hub.models.schema import ContentPart, Conversation, Message, Participant
 from conversation_hub.pipelines import ImportResult
-from conversation_hub.storage import conversations_to_list
+from conversation_hub.storage import conversations_to_list, write_conversations_sqlite
 
 
 def test_run_browse_workflow_prompts_for_provider_import_then_browses(tmp_path) -> None:
@@ -109,9 +109,10 @@ def test_run_browse_workflow_prompts_for_provider_import_then_browses(tmp_path) 
     ]
 
     combined_output = "\n".join(transcript)
-    assert "Choose how to load conversations" in combined_output
+    assert "Browse launcher" in combined_output
     assert "1. Open an existing normalized JSON file" in combined_output
     assert "2. Import from a provider and browse it now" in combined_output
+    assert "3. Open a local SQLite export" in combined_output
     assert "Choose provider [chatgpt, claude, codex]:" in combined_output
     assert f"Enter the source path for chatgpt:" in combined_output
     assert "Enter normalized output path" in combined_output
@@ -155,9 +156,51 @@ def test_run_browse_workflow_opens_existing_normalized_json(tmp_path) -> None:
     assert browse_calls == [_workflow_conversations()]
 
     combined_output = "\n".join(transcript)
-    assert "Choose how to load conversations" in combined_output
+    assert "Browse launcher" in combined_output
+    assert "3. Open a local SQLite export" in combined_output
     assert "Enter normalized JSON path:" in combined_output
     assert "Opening browser for 1 conversation from normalized JSON." in combined_output
+    assert "Browse session opened." in combined_output
+
+
+def test_run_browse_workflow_opens_existing_sqlite_export(tmp_path) -> None:
+    from conversation_hub.interactive.workflow import run_browse_workflow
+
+    input_path = tmp_path / "conversations.db"
+    write_conversations_sqlite(_workflow_conversations(), input_path)
+    transcript: list[str] = []
+    browse_calls: list[list[Conversation]] = []
+    commands = iter(["3", str(input_path)])
+
+    def fake_input() -> str:
+        return next(commands)
+
+    def fake_output(message: object = "") -> None:
+        transcript.append(str(message))
+
+    def fake_browse(
+        conversations: list[Conversation],
+        input_fn=None,
+        output_fn=None,
+    ) -> None:
+        browse_calls.append(conversations)
+        assert input_fn is fake_input
+        assert output_fn is fake_output
+        output_fn("Browse session opened.")
+
+    run_browse_workflow(
+        input_fn=fake_input,
+        output_fn=fake_output,
+        browse_runner=fake_browse,
+    )
+
+    assert browse_calls == [_workflow_conversations()]
+
+    combined_output = "\n".join(transcript)
+    assert "Browse launcher" in combined_output
+    assert "3. Open a local SQLite export" in combined_output
+    assert "Enter SQLite export path:" in combined_output
+    assert "Opening browser for 1 conversation from SQLite export." in combined_output
     assert "Browse session opened." in combined_output
 
 

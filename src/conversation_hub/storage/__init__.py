@@ -20,6 +20,7 @@ from conversation_hub.storage.sqlite_search import (
     SQLiteConversationSearchResult,
     SQLiteSearchMatch,
     SQLiteSearchResults,
+    load_conversations_sqlite,
     search_conversations_sqlite,
 )
 from conversation_hub.storage.sqlite_store import SQLiteWriteResult, write_conversations_sqlite
@@ -40,6 +41,7 @@ __all__ = [
     "SQLiteConversationSearchResult",
     "SQLiteSearchMatch",
     "SQLiteSearchResults",
+    "load_conversations_sqlite",
     "search_conversations_sqlite",
     "SQLiteWriteResult",
     "write_conversations_sqlite",

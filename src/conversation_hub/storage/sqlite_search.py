@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import json
 import sqlite3
 from dataclasses import dataclass
 from pathlib import Path
+
+from conversation_hub.models.schema import ContentPart, Conversation, Message, Participant
 
 
 @dataclass(frozen=True, slots=True)
@@ -132,6 +135,155 @@ def search_conversations_sqlite(
         result_count=len(results),
         results=results,
     )
+
+
+def load_conversations_sqlite(input_path: str | Path) -> list[Conversation]:
+    connection = sqlite3.connect(Path(input_path))
+    connection.row_factory = sqlite3.Row
+    try:
+        conversation_rows = connection.execute(
+            """
+            SELECT
+                source,
+                id,
+                title,
+                created_at,
+                updated_at,
+                tags_json,
+                metadata_json
+            FROM conversations
+            ORDER BY
+                coalesce(julianday(updated_at), julianday(created_at), 0) DESC,
+                source ASC,
+                id ASC
+            """
+        ).fetchall()
+
+        return [_conversation_from_row(connection, row) for row in conversation_rows]
+    finally:
+        connection.close()
+
+
+def _conversation_from_row(
+    connection: sqlite3.Connection,
+    row: sqlite3.Row,
+) -> Conversation:
+    participant_lookup = _load_participants(connection, row["source"], row["id"])
+
+    return Conversation(
+        id=row["id"],
+        source=row["source"],
+        title=row["title"],
+        participants=list(participant_lookup.values()),
+        messages=_load_messages(connection, row["source"], row["id"], participant_lookup),
+        created_at=row["created_at"],
+        updated_at=row["updated_at"],
+        tags=_load_json_list(row["tags_json"]),
+        metadata=_load_json_object(row["metadata_json"]),
+    )
+
+
+def _load_participants(
+    connection: sqlite3.Connection,
+    source: str,
+    conversation_id: str,
+) -> dict[str, Participant]:
+    rows = connection.execute(
+        """
+        SELECT
+            participant_key,
+            participant_id,
+            role,
+            display_name,
+            metadata_json
+        FROM participants
+        WHERE conversation_source = ? AND conversation_id = ?
+        ORDER BY sort_index ASC
+        """,
+        (source, conversation_id),
+    ).fetchall()
+
+    return {
+        row["participant_key"]: Participant(
+            id=row["participant_id"],
+            role=row["role"],
+            display_name=row["display_name"],
+            metadata=_load_json_object(row["metadata_json"]),
+        )
+        for row in rows
+    }
+
+
+def _load_messages(
+    connection: sqlite3.Connection,
+    source: str,
+    conversation_id: str,
+    participant_lookup: dict[str, Participant],
+) -> list[Message]:
+    rows = connection.execute(
+        """
+        SELECT
+            id,
+            participant_key,
+            created_at,
+            metadata_json
+        FROM messages
+        WHERE conversation_source = ? AND conversation_id = ?
+        ORDER BY sort_index ASC
+        """,
+        (source, conversation_id),
+    ).fetchall()
+
+    return [
+        Message(
+            id=row["id"],
+            participant=participant_lookup.get(row["participant_key"]),
+            parts=_load_parts(connection, source, conversation_id, row["id"]),
+            created_at=row["created_at"],
+            metadata=_load_json_object(row["metadata_json"]),
+        )
+        for row in rows
+    ]
+
+
+def _load_parts(
+    connection: sqlite3.Connection,
+    source: str,
+    conversation_id: str,
+    message_id: str,
+) -> list[ContentPart]:
+    rows = connection.execute(
+        """
+        SELECT kind, text, metadata_json
+        FROM content_parts
+        WHERE conversation_source = ? AND conversation_id = ? AND message_id = ?
+        ORDER BY part_index ASC
+        """,
+        (source, conversation_id, message_id),
+    ).fetchall()
+
+    return [
+        ContentPart(
+            kind=row["kind"],
+            text=row["text"],
+            metadata=_load_json_object(row["metadata_json"]),
+        )
+        for row in rows
+    ]
+
+
+def _load_json_object(payload: str) -> dict[str, object]:
+    data = json.loads(payload)
+    if not isinstance(data, dict):
+        raise ValueError("SQLite JSON payload must decode to an object")
+    return dict(data)
+
+
+def _load_json_list(payload: str) -> list[str]:
+    data = json.loads(payload)
+    if not isinstance(data, list):
+        raise ValueError("SQLite JSON payload must decode to a list")
+    return [str(item) for item in data]
 
 
 SQLiteSearchMatch = SQLiteConversationSearchMatch
