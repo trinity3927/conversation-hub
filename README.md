@@ -4,6 +4,16 @@
 
 It imports conversations from multiple sources, normalizes them into one schema, lets you browse and analyze them locally, and exports them into SQLite for search and downstream tooling.
 
+## Why It Exists
+
+AI chat history is valuable working memory, but it is usually fragmented across products, export formats, and local state directories.
+
+`conversation-hub` keeps that workflow local and deterministic:
+
+- provider-specific parsing lives behind explicit connectors
+- everything normalizes into one durable JSON schema
+- the same normalized data can be browsed, analyzed, exported, and searched without a hosted service
+
 ## What It Does
 
 - imports ChatGPT, Claude, and Codex conversation data
@@ -52,6 +62,15 @@ Run tests with:
 ```bash
 PYTHONPATH=src python -m pytest
 ```
+
+GitHub Actions runs the same pytest suite on pushes and pull requests.
+
+## Architecture Snapshot
+
+- `connectors/`: provider-specific import adapters for ChatGPT, Claude, and Codex local state
+- `pipelines/`: deterministic import and analysis orchestration
+- `storage/`: normalized JSON I/O plus SQLite export and local search
+- `interactive/`: terminal-first browse workflow built on the same normalized conversation objects
 
 ## Supported sources
 
