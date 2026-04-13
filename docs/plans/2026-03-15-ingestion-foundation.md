@@ -10,7 +10,7 @@ Tech stack: Python 3.11, dataclasses, pathlib, json, pytest.
 
 ---
 
-1. Create or attach the GitHub remote for `your-org/conversation-hub`, push `main`, and confirm the remote URL.
+1. Create or attach the GitHub remote for `trinity3927/conversation-hub`, push `main`, and confirm the remote URL.
 2. Add tests that describe the normalized schema behavior we want:
    - messages can expose joined text content from structured parts
    - conversations can return messages in chronological order
